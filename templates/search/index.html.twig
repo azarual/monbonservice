@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello SearchController!{% endblock %}
+
+{% block body %}
+
+
+<div class="container mt-4 mb-4">
+    {{ form_start(searchForm, {'attr':{'id': 'search_form','size':3}}) }}
+    {{ form_widget(searchForm) }}
+    <button class="btn btn-primary">{{ button_label|default('chercher') }}</button>
+    {{ form_end(searchForm) }}
+</div>
+
+{% endblock %}

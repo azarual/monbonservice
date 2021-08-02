@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Materiel Details!{% endblock %}
+
+{% block body %}
+
+
+<div class="container details">
+    <p><a href="{{ path('index')}}">Retourner au formulaire de recherche</a></p>
+    <p><span>Materiel id</span><span>{{materielDetails.materiel_id}}</span></p>
+    <p><span>Type id</span><span>{{materielDetails.type_id}}</span></p>
+    <p><span>Fabricant id</span><span>{{materielDetails.fabricant_id}}</span></p>
+    <p>...etc</p>
+</div>
+
+{% endblock %}

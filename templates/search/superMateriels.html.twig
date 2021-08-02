@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello SearchController!{% endblock %}
+
+{% block body %}
+
+
+<div class="container mt-4 mb-4">
+<p><a href="{{ path('index')}}">Retourner au formulaire de recherche</a></p>
+
+  {% if superMateriels %}
+      <table class="table table-stripe table-hover">
+        <thead>
+          <tr>
+            <th scope="col">materiel_id</th>
+            <th scope="col">nom_court</th>
+            <th scope="col">marque</th>
+            <th scope="col">prix_public</th>
+            <th scope="col">reference_fabricant</th>
+            <th scope="col">famille</th>
+            <th scope="col">Type>nom</th>
+            <th scope="col">Type>metier>nom</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for superMateriel in superMateriels %}
+          
+            {% for materiel in superMateriel %}
+              <tr>
+                <td><a href="{{ path('materiel_details', {'id': materiel['materiel_id']}) }}" >{{ materiel['materiel_id'] }}</a></td>
+                <td>{{ materiel['nom_court'] }}</td>
+                <td>{{ materiel['marque'] }}</td>
+                <td>{{ materiel['prix_public'] }}</td>
+                <td>{{ materiel['reference_fabricant'] }}</td>
+                <td>{{ materiel['type']['famille'] }}</td>
+                <td>{{ materiel['type']['nom'] }}</td>
+                <td>{{ materiel['type']['metier']['nom'] }}</td>
+              </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+  {% else %}
+    <span>Pas de materiels</span>
+  {% endif %}
+</div>
+
+{% endblock %}
