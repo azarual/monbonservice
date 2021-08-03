@@ -6,6 +6,26 @@ import './tablemanager.js';
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#search_form').addEventListener('submit', function (e) {
     e.preventDefault();
+
+
+    let btnSpinner = createElements('span', ['spinner-border', 'spinner-border-sm'], [
+      ["role", "status"],
+      ['aria-hidden', "true"]
+    ]);
+    let formBtn = document.querySelector('button.btn-primary');
+    formBtn.textContent = "";
+    formBtn.setAttribute('disabled', 'disabled');
+    formBtn.append(btnSpinner, "Loading...");
+
+
+    let tableSpinner = createElements('span', ['visually-hidden'], [], "Loading...");
+    let tableBody = document.querySelector('.materiel-container tbody');
+    if (tableBody) {
+      tableBody.textContent = "";
+      tableBody.classList.add('spinner-border');
+      tableBody.setAttribute('role', 'status');
+      tableBody.append(tableSpinner);
+    }
     let xhr = new XMLHttpRequest();
     xhr.onload = function (e) {
       if (this.readyState === 4) {
@@ -47,21 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
     xhr.send(new FormData(e.target));
   });
 
+  // Traitement de données reçu de l'API
   function renderingHtml(materiels) {
-    if (document.querySelector('#for_numrows')) {
-      document.querySelector('#for_numrows').remove();
-    }
-    if (document.querySelector('#for_filter_by')) {
-      document.querySelector('#for_filter_by').remove();
-    }
-    if (document.querySelector('#pagesControllers')) {
-      document.querySelector('#pagesControllers').remove();
-    }
-    let table = document.querySelector('.table');
+    let materielsContainer = document.querySelector('.materiel-container');
+    let formBtn = document.querySelector('button.btn-primary');
 
-    if (!table) {
+    if (materiels.length > 0) {
       let table = createElements('table', ['table', 'table-striped', 'table-hover', 'tablemanager']);
-
       let th_materielId = createElements('th', [], [
         ['scope', 'col']
       ], 'materiel_id');
@@ -93,49 +105,53 @@ document.addEventListener('DOMContentLoaded', function () {
       table.append(thead);
 
       let tbody = createElements('tBody');
-      if (materiels.length > 0) {
-        materiels.forEach(materiel => {
-          let td_materielId = createElements('td', [], []);
-          let linkMaterielDetails = createElements('a', ['tooltiped'], [
-            ['href', `${window.location.origin}/materiel/${materiel.materiel_id}`],
+
+      materiels.forEach(materiel => {
+        let td_materielId = createElements('td', [], []);
+        let linkMaterielDetails = createElements('a', ['tooltiped'], [
+          ['href', `${window.location.origin}/materiel/${materiel.materiel_id}`],
+          ['data-bs-toggle', 'tooltip'],
+          ['data-bs-placement', 'top'],
+          ['title', 'Cliquez pour voir les détails de ce produit']
+        ], materiel.materiel_id);
+        td_materielId.append(linkMaterielDetails);
+        let td_nomCourt = createElements('td', [], [], materiel.nom_court);
+        let td_marque = createElements('td', [], [], materiel.marque);
+        let td_prixPublic = createElements('td', [], [], materiel.prix_public);
+        let td_referenceFabricant = createElements('td', [], [], materiel.reference_fabricant);
+        let td_TypeFamille = createElements('td');
+        if ('super-materiel' == materiel.type.famille) {
+          let linkSuperMateriel = createElements('a', ['tooltiped'], [
+            ['href', `${window.location.origin}/super-materiels/${materiel.materiel_id}`],
             ['data-bs-toggle', 'tooltip'],
             ['data-bs-placement', 'top'],
-            ['title', 'Cliquez pour voir les détails de ce produit']
-          ], materiel.materiel_id);
-          td_materielId.append(linkMaterielDetails);
-          let td_nomCourt = createElements('td', [], [], materiel.nom_court);
-          let td_marque = createElements('td', [], [], materiel.marque);
-          let td_prixPublic = createElements('td', [], [], materiel.prix_public);
-          let td_referenceFabricant = createElements('td', [], [], materiel.reference_fabricant);
-          let td_TypeFamille = createElements('td');
-          if ('super-materiel' == materiel.type.famille) {
-            let linkSuperMateriel = createElements('a', ['tooltiped'], [
-              ['href', `${window.location.origin}/super-materiels/${materiel.materiel_id}`],
-              ['data-bs-toggle', 'tooltip'],
-              ['data-bs-placement', 'top'],
-              ['title', 'Ce produit est lié à d\'autres produits cliquez pour voir d\'éventuelles listes']
-            ], materiel.type.famille);
-            td_TypeFamille.append(linkSuperMateriel);
-          } else {
-            td_TypeFamille.textContent = materiel.type.famille;
-          }
-          let td_TypeNom = createElements('td', [], [], materiel.type.nom);
-          let td_TypeMetierNom = createElements('td', [], [], materiel.type.metier.nom);
-          let tr_body = createElements('tr');
-          tr_body.append(td_materielId, td_nomCourt, td_marque, td_prixPublic, td_referenceFabricant, td_TypeFamille, td_TypeNom, td_TypeMetierNom);
-          tbody.append(tr_body);
-        });
-        table.append(tbody);
-      } else {
-        tbody.textContent = "Pas de matériels avec les informations demandées"
-      }
-      document.querySelector('.container').append(table);
+            ['title', 'Ce produit est lié à d\'autres produits cliquez pour voir d\'éventuelles listes']
+          ], materiel.type.famille);
+          td_TypeFamille.append(linkSuperMateriel);
+        } else {
+          td_TypeFamille.textContent = materiel.type.famille;
+        }
+        let td_TypeNom = createElements('td', [], [], materiel.type.nom);
+        let td_TypeMetierNom = createElements('td', [], [], materiel.type.metier.nom);
+        let tr_body = createElements('tr');
+        tr_body.append(td_materielId, td_nomCourt, td_marque, td_prixPublic, td_referenceFabricant, td_TypeFamille, td_TypeNom, td_TypeMetierNom);
+        tbody.append(tr_body);
+      });
+      table.append(tbody);
+      formBtn.textContent = "chercher";
+      formBtn.removeAttribute('disabled');
+      materielsContainer.textContent = "";
+      materielsContainer.append(table);
     } else {
-      table.remove();
-      renderingHtml(materiels);
+      let p = createElements('p', ['mt-4'], [], "Pas de matériels avec les informations demandées");
+      formBtn.textContent = "chercher";
+      formBtn.removeAttribute('disabled');
+      materielsContainer.textContent = "";
+      materielsContainer.append(p);
     }
   }
 
+  // Helper function pour créer des éléments de DOM
   function createElements(tag, cls = null, attrs = null, text = null) {
     let elm = document.createElement(tag);
     if (null != cls) {
